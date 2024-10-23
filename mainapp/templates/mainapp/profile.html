@@ -6,9 +6,27 @@
     <title>User Profile</title>
 </head>
 <body>
-    <h1>Profile</h1>
-    <p>Welcome, {{ user.username }}!</p>
-    <p>Email: {{ user.email }}</p>
+    <h1>Welcome, {{ user.username }}</h1>
+    
+    <h2>Your Morning Thoughts</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}  <!-- Renders the form fields in paragraph format -->
+        <button type="submit">Submit</button>
+    </form>
+
+    <h3>Your Previous Thoughts:</h3>
+    <ul>
+        {% for note in morning_notes %}
+            <li>
+                <strong>{{ note.title }}</strong>: {{ note.content }} ({{ note.created_at }})
+            </li>
+        {% empty %}
+            <li>No morning thoughts yet.</li>
+        {% endfor %}
+    </ul>
+    
+    <br>
     <a href="{% url 'mainapp:user_logout' %}">Logout</a>
 </body>
 </html>

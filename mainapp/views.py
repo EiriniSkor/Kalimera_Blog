@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from mainapp.forms import RegisterForm, LoginForm
+from mainapp.forms import RegisterForm, LoginForm, MorningNotesForm
+from .models import MorningNotes
 
 # Home Page View
 def index(request):
@@ -22,7 +23,7 @@ def register(request):
     
     return render(request, 'mainapp/register.html', {'form': form})
 
-# Custom Login View (optional, you can use Django's built-in login view instead)
+# Custom Login View
 def user_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -44,7 +45,20 @@ def user_login(request):
 # User Profile View (accessible only when logged in)
 @login_required
 def profile(request):
-    return render(request, 'mainapp/profile.html', {'user': request.user})
+    if request.method == 'POST':
+        form = MorningNotesForm(request.POST)
+        if form.is_valid():
+            morning_note = form.save(commit=False)  # Do not save immediately
+            morning_note.user = request.user  # Set the user to the current logged-in user
+            morning_note.save()  # Now save it
+            return redirect('mainapp:profile')  # Redirect to the same profile page
+    else:
+        form = MorningNotesForm()
+
+    # Fetch existing morning notes (fix typo here)
+    morning_notes = MorningNotes.objects.filter(user=request.user)
+
+    return render(request, 'mainapp/profile.html', {'form': form, 'morning_notes': morning_notes})
 
 # User Logout View
 @login_required

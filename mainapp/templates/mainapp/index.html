@@ -1,15 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
-<body>
-    <h1>Welcome to Kalimera!</h1>
-    <p>
-        <a href="{% url 'mainapp:register' %}">Register</a> |
-        <a href="{% url 'mainapp:user_login' %}">Login</a>
-    </p>
-</body>
-</html>
+{% extends "mainapp/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block body_block %}
+    <div class="container">
+        <h1 class="mt-5">Welcome to Kalimera!</h1>
+        <p class="lead">Your wellness journey starts here. Track your health and wellness, connect with others, and find valuable resources.</p>
+        
+        <br><br>
+        <div class="row">
+            <div class="col-md-4 offset-md-4">
+                <ul class="nav flex-column">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-info" href="{% url 'mainapp:profile' %}">Go to my profile</a>
+                        </li>
+            
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-info" href="{% url 'mainapp:register' %}">New here? Register now</a>
+                        </li>
+                        <br>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-info" href="{% url 'mainapp:user_login' %}">Already have an account? Login</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
