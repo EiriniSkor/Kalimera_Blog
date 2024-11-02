@@ -1,10 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from mainapp.forms import RegisterForm, LoginForm, MorningNotesForm
 from .models import MorningNotes
+from .forms import MorningNotesForm
+
 
 # Home Page View
 def index(request):
@@ -65,3 +67,16 @@ def profile(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('mainapp:index'))
+
+@login_required
+def edit_thought(request, note_id):
+    note = get_object_or_404(MorningNotes, id=note_id, user=request.user)  # Ensure the note belongs to the user
+    if request.method == 'POST':
+        form = MorningNotesForm(request.POST, instance=note)
+        if form.is_valid():
+            form.save()
+            return redirect('mainapp:profile')  # Redirect back to profile after saving
+    else:
+        form = MorningNotesForm(instance=note)
+    
+    return render(request, 'mainapp/edit_thought.html', {'form': form, 'note_id': note_id})

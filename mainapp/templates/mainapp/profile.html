@@ -1,32 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile</title>
-</head>
-<body>
-    <h1>Welcome, {{ user.username }}</h1>
-    
-    <h2>Your Morning Thoughts</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}  <!-- Renders the form fields in paragraph format -->
-        <button type="submit">Submit</button>
-    </form>
+{% extends "mainapp/base.html" %}
 
-    <h3>Your Previous Thoughts:</h3>
-    <ul>
-        {% for note in morning_notes %}
-            <li>
-                <strong>{{ note.title }}</strong>: {{ note.content }} ({{ note.created_at }})
-            </li>
-        {% empty %}
-            <li>No morning thoughts yet.</li>
-        {% endfor %}
-    </ul>
+{% block title %}My Profile{% endblock %}
+
+{% block body_block %}
+    {% if user.is_authenticated %}
+        <h1>Welcome, {{ user.username }}</h1>
     
-    <br>
-    <a href="{% url 'mainapp:user_logout' %}">Logout</a>
-</body>
-</html>
+        <h2>Your Morning Thoughts</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }} 
+            <button type="submit">Submit</button>
+        </form>
+
+        <h3>Your Previous Thoughts:</h3>
+        <ul>
+            {% for note in morning_notes %}
+                <li>
+                    <strong>
+                        <a href="{% url 'mainapp:edit_thought' note.id %}">
+                            Morning thought {{ note.id }}
+                        </a>
+                    </strong>: 
+                    {% if note.content|length > 100 %}
+                        {{ note.content|slice:":100" }}... 
+                        <span class="more-content" id="content-{{ note.id }}" style="display: none;">
+                            {{ note.content|slice:"100:" }} <!-- Full content hidden initially -->
+                        </span>
+                        <span>
+                            <a href="javascript:void(0);" id="toggle-link-{{ note.id }}" onclick="toggleContent('{{ note.id }}')">Read more</a>
+                        </span>
+                    {% else %}
+                        {{ note.content }}  <!-- Display full content if less than 100 characters -->
+                    {% endif %}
+                    <span class="created-at">({{ note.created_at }})</span>
+                </li> 
+            {% empty %}
+                <li>No morning thoughts yet.</li>
+            {% endfor %}
+        </ul>
+        <br>
+        <a href="{% url 'mainapp:user_logout' %}">Logout</a>
+    {% else %}
+        <h1>Welcome, Guest!</h1>
+        <a href="{% url 'mainapp:user_login' %}">Login</a> or 
+        <a href="{% url 'mainapp:register' %}">Register</a>
+    {% endif %}
+
+    <script>
+        function toggleContent(noteId) {
+            var content = document.getElementById('content-' + noteId);
+            var toggleLink = document.getElementById('toggle-link-' + noteId);
+
+            if (content.style.display === 'none') {
+                content.style.display = 'inline';
+                toggleLink.innerHTML = 'Read less';  // Change link text to "Read less"
+            } else {
+                content.style.display = 'none';
+                toggleLink.innerHTML = 'Read more';  // Change link text back to "Read more"
+            }
+        }
+    </script>
+{% endblock %}

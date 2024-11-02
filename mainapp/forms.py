@@ -19,7 +19,7 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ['username', 'email', 'password1', 'password2']
 
-# Optional Login Form (if you want custom handling)
+
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
@@ -28,4 +28,4 @@ class LoginForm(forms.Form):
 class MorningNotesForm(forms.ModelForm):
     class Meta:
         model=MorningNotes
-        fields = ['title', 'content']
+        fields = ['content']
